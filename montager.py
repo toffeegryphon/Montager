@@ -3,6 +3,8 @@ import random
 from contextlib import suppress
 from math import sqrt
 
+## TODO Need to include checks for params
+
 # Source Image
 source = Image.open("test/test.jpg")
 
@@ -20,7 +22,7 @@ size = (400, 400)
 closeness = 100
 
 # Number of Images to be Generated
-n = 20
+n = 40
 
 # Rate of Image Flash (Images per Second)
 rate = 10
@@ -33,29 +35,29 @@ corners = [(random.randint(0, original[0] - size[0]*density), random.randint(0, 
 
 # Checking for closeness
 # O(n) of n**2, can be improved
-def check(points: list):
-    axis = 0 # 0: X, 1: Y
-    while axis < 2:
-        points.sort(key=lambda x: x[axis])
-        i = 0
-        while i < n:
-            # Euclidean Distance > closeness if and only if Manhattan Distance > closeness
-            if points[i][axis] < points[i-1][axis] + closeness:
-                x = points[i][0] - points[i-1][0]
-                y = points[i][1] - points[i-1][1]
-                z = int(sqrt(x**2 + y**2))
-                # Remove points if too close
-                if z < closeness:
-                    corners.remove(points[i])
-                    points.pop(i)
-            i += 1
-        axis += 1
-    return points
+def check(corners: list):
+    with suppress(IndexError):
+        axis = 0 # 0: X, 1: Y
+        while axis < 2:
+            # points.sort(key=lambda x: x[axis])
+            points = sorted(corners, key=lambda x: x[axis])
+            i = 0
+            while i < n:
+                # Euclidean Distance > closeness if and only if Manhattan Distance > closeness
+                if points[i][axis] < points[i-1][axis] + closeness:
+                    x = points[i][0] - points[i-1][0]
+                    y = points[i][1] - points[i-1][1]
+                    z = int(sqrt(x**2 + y**2))
+                    # Remove points if too close
+                    if z < closeness:
+                        corners.remove(points[i])
+                        points.pop(i)
+                i += 1
+            axis += 1
+    return corners
 
 # Check for closeness once
-points = corners
-points = check(points)
-print(len(points))
+corners = check(corners)
 
 # Create Result Images (Frames) and put into List
 frames = []
